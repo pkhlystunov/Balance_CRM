@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <title>Управление пользователями</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Стили (путь css/) -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/users.css">
+</head>
+<body>
+    <!-- Кнопка мобильного меню -->
+    <button class="mobile-toggle" id="mobile-toggle" aria-label="Открыть меню">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="layout">
+        <!-- БОКОВОЕ МЕНЮ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="dashboard.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+                    <img src="icon-192.png" alt="Логотип" style="width: 32px; height: 32px; border-radius: 6px; object-fit: contain; background: white; padding: 2px;">
+                    <h2>HSE Portal</h2>
+                </a>
+                <button class="toggle-btn" id="toggle-sidebar" title="Свернуть меню">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+    <div class="menu-section-title">Веб-сервисы</div>
+    
+    <!-- Ситуационный центр -->
+    <a href="https://pkhlystunov.github.io/balance-cl-sc-v.4.0.1./admin.html" class="menu-item" id="menu-situational" target="_blank" rel="noopener noreferrer">
+        <i class="fas fa-chart-line"></i>
+        <span>Ситуационный центр</span>
+    </a>
+    
+    <!-- Контроль ОТиПБ -->
+    <a href="https://pkhlystunov.github.io/balance-cl-sc-v.4.0.1./" class="menu-item" id="menu-control" target="_blank" rel="noopener noreferrer">
+        <i class="fas fa-hard-hat"></i>
+        <span>Контроль ОТиПБ</span>
+    </a>
+    
+    <!-- Тестирование по ОТ (внутренняя ссылка) -->
+    <a href="test-public.html" class="menu-item" id="menu-test">
+        <i class="fas fa-clipboard-check"></i>
+        <span>Тестирование по ОТ</span>
+    </a>
+</div>
+                <div class="menu-section">
+                    <div class="menu-section-title">Модули ОТиПБ</div>
+                    <a href="personnel.html" class="menu-item" id="menu-personnel"><i class="fas fa-user-graduate"></i><span>Обучение и медосмотры</span></a>
+                    <a href="siz-registry.html" class="menu-item" id="menu-siz"><i class="fas fa-vest"></i><span>Реестр СИЗ</span></a>
+                    <a href="sout-opr.html" class="menu-item" id="menu-sout"><i class="fas fa-clipboard-list"></i><span>СОУТ и ОПР</span></a>
+                    <a href="test-analytics.html" class="menu-item" id="menu-analytics"><i class="fas fa-chart-bar"></i><span>Аналитика тестов</span></a>
+                    <a href="notifications.html" class="menu-item" id="menu-notifications"><i class="fas fa-bell"></i><span>Уведомления</span></a>
+                    <a href="users.html" class="menu-item active" id="menu-users"><i class="fas fa-users-cog"></i><span>Пользователи</span></a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- ОСНОВНОЙ КОНТЕНТ -->
+        <main class="main-content">
+            <!-- Верхняя панель -->
+            <div class="top-header">
+                <div class="user-info">
+                    <i class="fas fa-user-circle" style="font-size: 1.5rem; color: #3498db;"></i>
+                    <span id="user-name">Загрузка...</span>
+                </div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <button class="btn btn-danger" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i> Выход
+                    </button>
+                </div>
+            </div>
+
+            <!-- КОНТЕНТ УПРАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯМИ -->
+            <div class="container" style="max-width: 100%; padding: 0;">
+                <div class="top-bar">
+                    <h2>Список пользователей</h2>
+                    <button class="btn btn-success" onclick="openModal()">➕ Добавить пользователя</button>
+                </div>
+
+                <div class="user-list">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ФИО</th>
+                                <th>Email</th>
+                                <th>Роль</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr><td colspan="4" class="empty-state">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Добавить пользователя</h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="userForm" onsubmit="saveUser(event)">
+                <input type="hidden" id="editUserId">
+                
+                <!-- Поле для UUID появляется только при создании нового пользователя -->
+                <div class="form-group" id="uuidGroup" style="display: none;">
+                    <label>ID пользователя (UUID из Supabase Auth) *</label>
+                    <input type="text" id="f_uuid" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+                    <div class="hint">Зайдите в Supabase → Authentication → Users, скопируйте ID созданного пользователя.</div>
+                </div>
+
+                <div class="form-group">
+                    <label>ФИО *</label>
+                    <input type="text" id="f_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email (для отображения)</label>
+                    <input type="email" id="f_email" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Роль *</label>
+                    <select id="f_role" required>
+                        <option value="admin">Администратор</option>
+                        <option value="engineer">Специалист по ОТ</option>
+                        <option value="chief_engineer">Директор/Главный инженер</option>
+                        <option value="kladovshchik">Кладовщик</option>
+                        <option value="user">Пользователь</option>
+                    </select>
+                </div>
+
+                <p id="formError" class="error-message"></p>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn btn-success" id="saveBtn">💾 Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Скрипт страницы (путь js/pages/) -->
+    <script type="module" src="js/pages/users.js"></script>
+</body>
+</html>
