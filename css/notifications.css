@@ -1,0 +1,94 @@
+/* css/notifications.css — стили центра уведомлений */
+
+/* Ограничиваем ширину основного контента, чтобы страница не растягивалась */
+.main-content {
+    overflow-x: hidden !important;
+    max-width: 100vw;
+    width: 100%;
+}
+
+.container { 
+    max-width: 100% !important; 
+    overflow-x: hidden !important; 
+    width: 100%; 
+}
+
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.notification-card {
+    background: white;
+    padding: 1.2rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    transition: all 0.3s;
+    cursor: pointer;
+    border-left: 4px solid transparent;
+}
+
+.notification-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.notification-card.unread { background: #fffef5; }
+.notification-card.severity-danger { border-left-color: #e74c3c; }
+.notification-card.severity-warning { border-left-color: #f39c12; }
+
+.notif-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f4f6f9;
+}
+
+.severity-danger .notif-icon { background: #fdecea; }
+.severity-warning .notif-icon { background: #fef9e7; }
+
+.notif-content { flex: 1; }
+.notif-title { font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
+.notif-message { color: #555; font-size: 14px; line-height: 1.4; white-space: pre-line; }
+.notif-meta { color: #999; font-size: 12px; margin-top: 8px; }
+
+.empty-state { 
+    text-align: center; 
+    padding: 4rem 2rem; 
+    color: #7f8c8d; 
+}
+
+.empty-state .icon { 
+    font-size: 3rem; 
+    margin-bottom: 1rem; 
+}
+
+/* Кнопка удаления уведомления */
+.btn-delete-notif {
+    background: none;
+    border: none;
+    color: #95a5a6;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 8px;
+    transition: color 0.3s;
+    opacity: 0.6;
+}
+
+.notification-card:hover .btn-delete-notif {
+    opacity: 1;
+}
+
+.btn-delete-notif:hover {
+    color: #e74c3c;
+    transform: scale(1.1);
+}

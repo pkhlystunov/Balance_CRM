@@ -1,0 +1,72 @@
+/* css/test-analytics.css — стили аналитики тестирования */
+
+/* Ограничиваем ширину основного контента, чтобы страница не растягивалась */
+.main-content {
+    overflow-x: hidden !important;
+    max-width: 100vw;
+    width: 100%;
+}
+.container {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    width: 100%;
+}
+
+.filters h3 { margin-bottom: 1rem; color: #2c3e50; }
+.filters { display: block; }
+.stats { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.stat-card { padding: 1.5rem; }
+.stat-card .number { font-size: 2.5rem; }
+.stat-card .label { font-size: 0.9rem; margin-top: 0.5rem; }
+.filter-group label { font-size: 14px; font-weight: 500; }
+
+/* Список сотрудников */
+.employee-list {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    width: 100%;
+}
+.employee-item { border-bottom: 1px solid #ecf0f1; }
+.employee-item:last-child { border-bottom: none; }
+
+.employee-header {
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+.employee-header:hover { background: #e9ecef; }
+.employee-header .name { font-weight: 600; color: #2c3e50; font-size: 1.1rem; }
+.employee-header .stats { display: flex; gap: 15px; font-size: 0.9rem; }
+.employee-header .stat { padding: 4px 10px; border-radius: 12px; font-weight: 500; }
+.stat.total { background: #e3f2fd; color: #1976d2; }
+.stat.passed { background: #e8f5e9; color: #388e3c; }
+.stat.failed { background: #ffebee; color: #c62828; }
+
+.employee-details { display: none; padding: 1rem 1.5rem; background: white; }
+.employee-details.active { display: block; }
+
+.test-record {
+    padding: 0.8rem;
+    margin-bottom: 0.8rem;
+    border-left: 3px solid #ddd;
+    background: #fafafa;
+    border-radius: 4px;
+}
+.test-record.passed { border-left-color: #27ae60; }
+.test-record.failed { border-left-color: #e74c3c; }
+.test-record .date { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 0.3rem; }
+.test-record .program { font-weight: 600; color: #2c3e50; margin-bottom: 0.3rem; }
+.test-record .result { display: flex; justify-content: space-between; align-items: center; }
+.test-record .score { font-size: 0.9rem; color: #555; }
+.test-record .status { padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; }
+.test-record .status.passed { background: #27ae60; color: white; }
+.test-record .status.failed { background: #e74c3c; color: white; }
+
+.toggle-icon { transition: transform 0.3s; }
+.employee-header.active .toggle-icon { transform: rotate(180deg); }

@@ -1,0 +1,56 @@
+/* css/users.css — стили страницы управления пользователями */
+
+/* Ограничиваем ширину основного контента */
+.main-content {
+    overflow-x: hidden !important;
+    max-width: 100vw;
+    width: 100%;
+}
+
+.container {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    width: 100%;
+}
+
+.user-list {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    width: 100%;
+}
+
+/* Таблица */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #34495e;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+/* Поле email в режиме редактирования — только для чтения */
+#f_email {
+    background: #f4f6f9;
+    cursor: not-allowed;
+}
+
+/* Адаптивность */
+@media screen and (max-width: 768px) {
+    .user-list table {
+        font-size: 12px;
+    }
+    .user-list th, .user-list td {
+        padding: 8px 4px;
+    }
+}
