@@ -29,11 +29,12 @@ export async function generateNotifications() {
         const checkSoutOpr = ['admin', 'engineer', 'chief_engineer'].includes(role);
         const checkTraining = ['admin', 'engineer', 'chief_engineer'].includes(role);
         const checkSiz = ['admin', 'engineer', 'chief_engineer', 'kladovshchik'].includes(role);
+        const checkTech = ['admin', 'engineer', 'chief_engineer', 'mechanic'].includes(role);
 
         let createdCount = 0;
         const yesterday = new Date(Date.now() - 86400000).toISOString();
 
-        // 1. Проверка СОУТ/ОПР (только для admin/engineer/chief_engineer)
+        // 1. Проверка СОУТ/ОПР
         if (checkSoutOpr) {
             const { data: soutData } = await supabase.from('sout_workplaces').select('*');
             if (soutData) {
@@ -57,7 +58,6 @@ export async function generateNotifications() {
 
                     if (severity) {
                         const title = `${severity === 'danger' ? '⛔' : '⚠️'} Срок СОУТ истекает: ${wp.position}`;
-                        // Проверка на дубликаты за последние 24 часа
                         const { count } = await supabase
                             .from('notifications')
                             .select('*', { count: 'exact', head: true })
@@ -79,11 +79,10 @@ export async function generateNotifications() {
             }
         }
 
-        // 2. Проверка Обучения (только для admin/engineer/chief_engineer)
+        // 2. Проверка Обучения
         if (checkTraining) {
             const { data: trainingData } = await supabase.from('employees_training').select('*');
             if (trainingData) {
-                // Группировка проблем по сотрудникам
                 const employeeIssues = {};
                 
                 for (const emp of trainingData) {
@@ -124,7 +123,6 @@ export async function generateNotifications() {
                     }
                 }
 
-                // Создание одного уведомления на сотрудника
                 for (const empId in employeeIssues) {
                     const emp = employeeIssues[empId];
                     const hasDanger = emp._issues.some(i => i.type === 'danger');
@@ -153,7 +151,7 @@ export async function generateNotifications() {
             }
         }
 
-        // 3. Проверка СИЗ (для всех, включая кладовщика)
+        // 3. Проверка СИЗ
         if (checkSiz) {
             const { data: sizData } = await supabase.from('employees_siz').select('*');
             if (sizData) {
@@ -221,6 +219,64 @@ export async function generateNotifications() {
                             severity: severity
                         });
                         createdCount++;
+                    }
+                }
+            }
+        }
+
+        // 4. Проверка ТЕХНИКИ (новое!)
+        if (checkTech) {
+            const { data: techData } = await supabase.from('tech_registry').select('*');
+            if (techData) {
+                for (const tech of techData) {
+                    // Проверяем все сроки, КРОМЕ epb_certificate_date
+                    const dateFields = [
+                        { key: 'cto_date', label: 'ЧТО' },
+                        { key: 'pto_date', label: 'ПТО' },
+                        { key: 'epb_date', label: 'ЭПБ' },
+                        { key: 'diagnostic_card_date', label: 'Диагностическая карта' },
+                        { key: 'insurance_date', label: 'Страховка' }
+                    ];
+
+                    const issues = [];
+                    const now = new Date();
+
+                    for (const field of dateFields) {
+                        const date = parseDate(tech[field.key]);
+                        if (!date) continue;
+
+                        const daysLeft = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+
+                        if (daysLeft < 0) {
+                            issues.push({ type: 'danger', text: `${field.label} просрочен на ${Math.abs(daysLeft)} дн.` });
+                        } else if (daysLeft <= WARNING_DAYS_BEFORE_EXPIRY) {
+                            issues.push({ type: 'warning', text: `${field.label} истекает через ${daysLeft} дн.` });
+                        }
+                    }
+
+                    if (issues.length > 0) {
+                        const hasDanger = issues.some(i => i.type === 'danger');
+                        const severity = hasDanger ? 'danger' : 'warning';
+                        const issuesList = issues.map(i => `• ${i.text}`).join('\n');
+                        
+                        const title = `${hasDanger ? '⛔' : '⚠️'} Истекает срок по технике: ${tech.brand_model} (${tech.license_plate || 'б/н'})`;
+                        
+                        const { count } = await supabase
+                            .from('notifications')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('title', title)
+                            .gte('created_at', yesterday);
+
+                        if (!count || count === 0) {
+                            await supabase.from('notifications').insert({
+                                type: 'tech',
+                                title: title,
+                                message: `${tech.owner || ''} • Водитель: ${tech.driver || '—'}\n${issuesList}`,
+                                link: 'tech.html',
+                                severity: severity
+                            });
+                            createdCount++;
+                        }
                     }
                 }
             }
