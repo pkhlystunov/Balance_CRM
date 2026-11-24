@@ -163,6 +163,7 @@ tr:last-child td { border-bottom: none; }
 .role-engineer { background: #3498db; color: white; }
 .role-chief { background: #9b59b6; color: white; }
 .role-kladovshchik { background: #f39c12; color: white; }
+.role-mechanic { background: #16a085; color: white; }
 .role-user { background: #95a5a6; color: white; }
 
 .status-badge {

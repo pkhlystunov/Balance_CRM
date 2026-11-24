@@ -1,0 +1,189 @@
+/* css/tech.css — стили реестра техники */
+
+.main-content {
+    overflow-x: hidden !important;
+    max-width: 100vw;
+    width: 100%;
+}
+
+.container {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    width: 100%;
+}
+
+.table-wrapper {
+    overflow-x: auto !important;
+    overflow-y: visible !important; /* ВАЖНО: убираем вертикальное ограничение */
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: white;
+    /* max-height убран — теперь таблица растёт естественно */
+}
+
+table {
+    font-size: 12px;
+    table-layout: auto;
+    min-width: 1600px;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 10px 8px;
+    font-size: 11px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #34495e;
+    color: white;
+    border: 1px solid #2c3e50;
+    white-space: nowrap;
+}
+
+td {
+    padding: 8px 6px;
+    vertical-align: middle;
+    word-wrap: break-word;
+    max-width: 150px;
+    border: 1px solid #ecf0f1;
+    white-space: nowrap;
+}
+
+/* Подсветка ячеек с датами */
+.cell-ok { background: #d4edda; color: #155724; }
+.cell-warning { background: #fff3cd; color: #856404; cursor: help; }
+.cell-expired { background: #f8d7da; color: #721c24; font-weight: bold; cursor: help; }
+.cell-nt { background: #e2e3e5; color: #383d41; }
+.cell-empty { background: #ffffff; color: #999; }
+
+/* Модальное окно */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal-header h3 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #7f8c8d;
+}
+
+.close-modal:hover {
+    color: #e74c3c;
+}
+
+.form-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.form-section h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    border-left: 4px solid #3498db;
+    padding-left: 10px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group input,
+.form-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100%;
+}
+
+.form-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@media screen and (max-width: 768px) {
+    .filters { flex-direction: column; align-items: stretch; }
+    .filter-group input, .filter-group select { min-width: 100%; }
+}
+
+/* Кликабельные строки таблицы */
+#tableBody tr {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#tableBody tr:hover {
+    background-color: #f0f8ff !important;
+}
+
+#tableBody tr:hover td {
+    background-color: #f0f8ff !important;
+}
+
+/* Кнопка редактирования — не реагирует на hover строки */
+#tableBody tr:hover .btn {
+    background-color: #2980b9;
+}
