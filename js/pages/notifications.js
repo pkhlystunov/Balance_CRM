@@ -10,16 +10,18 @@ let notifications = [];
 const typeIcons = {
     'sout': '📋',
     'training': '🎓',
-    'siz': '🦺'
+    'siz': '🦺',
+    'tech': '🔧'  // ← НОВАЯ ИКОНКА
 };
 
 const typeLabels = {
     'sout': 'СОУТ/ОПР',
     'training': 'Обучение',
-    'siz': 'СИЗ'
+    'siz': 'СИЗ',
+    'tech': 'Техника'  // ← НОВАЯ МЕТКА
 };
 
-// ===== НОВЫЕ ФУНКЦИИ ДЛЯ НАВИГАЦИИ =====
+// ===== ФУНКЦИИ НАВИГАЦИИ =====
 
 async function updateUserInfo() {
     try {
@@ -61,11 +63,12 @@ function applyRoleToSidebar() {
     const role = localStorage.getItem('user_role');
     const adminOnlyIds = ['menu-users'];
     const kladovshchikHiddenIds = [
-        'menu-situational', 'menu-control', 'menu-test', 
-        'menu-personnel', 'menu-sout', 'menu-analytics', 'menu-users'
+        'menu-situational', 'menu-control', 'menu-test',
+        'menu-personnel', 'menu-sout', 'menu-tech',
+        'menu-analytics', 'menu-users'
     ];
 
-    if (role === 'kladovshchik') {
+    if (role === 'kladovshchik' || role === 'user') {
         kladovshchikHiddenIds.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
@@ -114,7 +117,7 @@ function initSidebar() {
     });
 }
 
-// ===== ЛОГИКА УВЕДОМЛЕНИЙ С ФУНКЦИЕЙ УДАЛЕНИЯ =====
+// ===== ЛОГИКА УВЕДОМЛЕНИЙ =====
 
 async function loadNotifications() {
     const { data, error } = await supabase
@@ -161,7 +164,6 @@ function renderNotifications() {
                     <div class="notif-message">${message}</div>
                     <div class="notif-meta">${label} • ${date}${n.is_read ? '' : ' • 🆕 Новое'}</div>
                 </div>
-                <!-- Кнопка удаления -->
                 <button class="btn-delete-notif" onclick="event.stopPropagation(); deleteNotification('${id}')" title="Удалить уведомление">
                     <i class="fas fa-trash-alt"></i>
                 </button>
@@ -170,7 +172,6 @@ function renderNotifications() {
     }).join('');
 }
 
-// Удаление одного уведомления
 window.deleteNotification = async function(id) {
     if (confirm('Удалить это уведомление?')) {
         await supabase.from('notifications').delete().eq('id', id);
@@ -180,7 +181,6 @@ window.deleteNotification = async function(id) {
     }
 };
 
-// Помечает все как прочитанные И удаляет их (функция "Стереть")
 window.markAllRead = async function() {
     if (notifications.length === 0) return;
     
@@ -194,7 +194,8 @@ window.markAllRead = async function() {
 };
 
 window.handleClick = async function(id, link) {
-    const allowedLinks = ['personnel.html', 'siz-registry.html', 'sout-opr.html', 'test-analytics.html', 'users.html'];
+    // Добавлен tech.html в список разрешённых ссылок
+    const allowedLinks = ['personnel.html', 'siz-registry.html', 'sout-opr.html', 'tech.html', 'test-analytics.html', 'users.html'];
     
     await supabase.from('notifications').update({ is_read: true }).eq('id', id);
     

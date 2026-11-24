@@ -3,11 +3,9 @@
  * Страница без авторизации — доступна сотрудникам для прохождения тестов.
  *
  * Безопасность:
- * - Ключи берутся из js/config.js (ранее были захардкожены в HTML
- *   с ДРУГИМ значением ключа — несоответствие устранено).
+ * - Ключи берутся из js/config.js.
  * - Тексты вопросов/вариантов из БД экранируются (escapeHtml) при отрисовке.
- * - Список вопросов никогда не отправляется в сохраняемый результат
- *   (сохраняются только индексы ответов, а не копии вопросов).
+ * - Список вопросов никогда не отправляется в сохраняемый результат.
  */
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config.js';
@@ -36,6 +34,101 @@ const resultArea = getEl('resultArea');
 const personFields = getEl('personFields');
 const fioInput = getEl('fioInput');
 const positionInput = getEl('positionInput');
+
+// ===== НОВЫЕ ФУНКЦИИ ДЛЯ НАВИГАЦИИ =====
+
+/**
+ * Обновление имени и роли в шапке (для публичной страницы).
+ */
+function updateUserInfo() {
+    try {
+        const userEl = document.getElementById('user-name');
+        if (!userEl) return;
+
+        let userName = localStorage.getItem('user_name');
+        let role = localStorage.getItem('user_role');
+
+        // На публичной странице сессии может не быть
+        if (!userName || !role) {
+            userName = 'Гость';
+            role = 'guest';
+        }
+        
+        const displayRole = role === 'guest' ? 'Гость' : role;
+        userEl.textContent = `${userName} (${displayRole})`;
+    } catch (error) {
+        console.error('Ошибка загрузки данных пользователя:', error);
+        const userEl = document.getElementById('user-name');
+        if (userEl) userEl.textContent = 'Гость';
+    }
+}
+
+/**
+ * Скрывает пункты бокового меню, недоступные для текущей роли.
+ */
+function applyRoleToSidebar() {
+    const role = localStorage.getItem('user_role') || 'guest';
+    const adminOnlyIds = ['menu-users'];
+    
+    // ВАЖНО: 'menu-siz' НЕ в этом списке (кладовщик его видит).
+    // 'menu-tech' добавлен, чтобы скрыть новый модуль.
+    const kladovshchikHiddenIds = [
+        'menu-situational', 'menu-control', 'menu-test',
+        'menu-personnel', 'menu-sout', 'menu-tech', 'menu-analytics', 'menu-users'
+    ];
+
+    if (role === 'kladovshchik' || role === 'user' || role === 'guest') {
+        kladovshchikHiddenIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+    }
+
+    if (role !== 'admin') {
+        adminOnlyIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+    }
+}
+
+/**
+ * Инициализация сворачивания меню.
+ */
+function initSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggle-sidebar');
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const icon = toggleBtn?.querySelector('i');
+
+    if (localStorage.getItem('sidebar_collapsed') === 'true') {
+        sidebar.classList.add('collapsed');
+        if (icon) icon.className = 'fas fa-chevron-right';
+    }
+
+    toggleBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        localStorage.setItem('sidebar_collapsed', isCollapsed);
+        if (icon) {
+            icon.className = isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+        }
+    });
+
+    mobileToggle?.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 &&
+            !sidebar.contains(e.target) &&
+            !mobileToggle.contains(e.target) &&
+            sidebar.classList.contains('mobile-open')) {
+            sidebar.classList.remove('mobile-open');
+        }
+    });
+}
+// ===== КОНЕЦ НОВЫХ ФУНКЦИЙ =====
 
 /**
  * Загрузка программ тестирования.
@@ -92,16 +185,13 @@ function shuffleArray(arr) {
 }
 
 /**
- * Перемешивает варианты ответов для каждого вопроса,
- * возвращая новый массив вариантов и карту соответствия
- * нового индекса -> исходный индекс (для проверки правильности).
+ * Перемешивает варианты ответов для каждого вопроса.
  */
 function shuffleOptions(question) {
     const options = question.options || [];
     const order = shuffleArray(options.map((_, i) => i));
     return {
         options: order.map(i => options[i]),
-        // correct_index из БД — исходный индекс; находим его новую позицию
         correctIndex: order.indexOf(question.correct_index)
     };
 }
@@ -155,7 +245,6 @@ async function startTest() {
     }
 
     const shuffled = shuffleArray(allQuestions);
-    // Перемешиваем и порядок вопросов, и варианты ответов в каждом вопросе
     selectedQuestions = shuffled.slice(0, 5).map(q => {
         const { options, correctIndex } = shuffleOptions(q);
         return { ...q, options, correct_index: correctIndex };
@@ -267,7 +356,6 @@ async function finishTest() {
     finishHint.textContent = 'Тест завершён';
 
     const organization = 'ООО "СК "Жилье"';
-    // Дата сдачи теста фиксируется в момент завершения (дата без времени)
     const testDateStr = new Date().toLocaleDateString('ru-RU');
 
     const results = [];
@@ -290,8 +378,6 @@ async function finishTest() {
     const percent = Math.round((correctCount / total) * 100);
     const passed = percent >= 70;
 
-    // Сохранение результата в БД (состав полей — исходная схема таблицы,
-    // без поля organization, которого нет в test_results)
     const { error: saveError } = await supabase
         .from('test_results')
         .insert({
@@ -311,8 +397,6 @@ async function finishTest() {
         return;
     }
 
-    // Отображение результата (тексты экранируются).
-    // Шапка: название организации + вид теста, далее реквизиты и дата сдачи
     let resultHtml = `<div class="result-summary">
         <strong>${escapeHtml(organization)}. Тестирование по ОТ</strong><br>
         <strong>Программа:</strong> ${escapeHtml(currentProgramName)}<br>
@@ -359,5 +443,8 @@ finishBtn.addEventListener('click', finishTest);
 programSelect.addEventListener('change', resetTest);
 
 // Инициализация
+updateUserInfo();
+applyRoleToSidebar();
+initSidebar();
 loadPrograms();
 resetTest();

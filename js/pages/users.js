@@ -14,6 +14,7 @@ const roleLabels = {
     'engineer': { text: 'Специалист по ОТ', class: 'role-engineer' },
     'chief_engineer': { text: 'Директор/Гл. инженер', class: 'role-chief' },
     'kladovshchik': { text: 'Кладовщик', class: 'role-kladovshchik' },
+    'mechanic': { text: 'Механик', class: 'role-mechanic' },  // ← НОВАЯ РОЛЬ
     'user': { text: 'Пользователь', class: 'role-user' }
 };
 
@@ -59,6 +60,35 @@ async function updateUserInfo() {
         console.error('Ошибка загрузки данных пользователя:', error);
         const userEl = document.getElementById('user-name');
         if (userEl) userEl.textContent = 'Ошибка загрузки';
+    }
+}
+
+/**
+ * Скрывает пункты бокового меню, недоступные для текущей роли.
+ * На этой странице доступен только admin, поэтому меню показывается полностью.
+ * Но функция нужна для единообразия и защиты от ручного открытия URL.
+ */
+function applyRoleToSidebar() {
+    const role = localStorage.getItem('user_role');
+    const adminOnlyIds = ['menu-users'];
+    const kladovshchikHiddenIds = [
+        'menu-situational', 'menu-control', 'menu-test',
+        'menu-personnel', 'menu-sout', 'menu-tech',
+        'menu-analytics', 'menu-users'
+    ];
+
+    if (role === 'kladovshchik' || role === 'user') {
+        kladovshchikHiddenIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+    }
+
+    if (role !== 'admin') {
+        adminOnlyIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
     }
 }
 
@@ -252,6 +282,7 @@ async function init() {
     await updateUserInfo();
     
     // 2. Инициализируем меню
+    applyRoleToSidebar();
     initSidebar();
     
     // 3. Загружаем данные

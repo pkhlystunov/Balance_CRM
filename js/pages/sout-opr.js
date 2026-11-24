@@ -64,12 +64,15 @@ async function updateUserInfo() {
 function applyRoleToSidebar() {
     const role = localStorage.getItem('user_role');
     const adminOnlyIds = ['menu-users'];
+    
+    // ВАЖНО: 'menu-siz' НЕ в этом списке (кладовщик его видит).
+    // 'menu-tech' добавлен, чтобы скрыть новый модуль.
     const kladovshchikHiddenIds = [
         'menu-situational', 'menu-control', 'menu-test', 
-        'menu-personnel', 'menu-sout', 'menu-analytics', 'menu-users'
+        'menu-personnel', 'menu-sout', 'menu-tech', 'menu-analytics', 'menu-users'
     ];
 
-    if (role === 'kladovshchik') {
+    if (role === 'kladovshchik' || role === 'user') {
         kladovshchikHiddenIds.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';

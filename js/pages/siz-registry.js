@@ -59,18 +59,19 @@ function applyRoleToSidebar() {
     // Пункты, видимые ТОЛЬКО админу
     const adminOnlyIds = ['menu-users'];
     
-    // Пункты, НЕДОСТУПНЫЕ кладовщику (он видит только СИЗ и Уведомления)
+    // Пункты, НЕДОСТУПНЫЕ кладовщику 
+    // ВАЖНО: 'menu-siz' УБРАН из этого списка, так как кладовщик работает с СИЗ!
     const kladovshchikHiddenIds = [
         'menu-situational', 
         'menu-control', 
         'menu-test', 
         'menu-personnel', 
         'menu-sout', 
+        'menu-tech',      // Техника тоже скрыта для кладовщика
         'menu-analytics', 
         'menu-users'
     ];
 
-    // Сначала скрываем всё для кладовщика
     if (role === 'kladovshchik') {
         kladovshchikHiddenIds.forEach(id => {
             const el = document.getElementById(id);

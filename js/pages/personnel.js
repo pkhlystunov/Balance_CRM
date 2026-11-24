@@ -28,7 +28,6 @@ const DATE_FIELDS = [
 
 /**
  * Надежное обновление имени и роли в шапке.
- * Берет из localStorage или запрашивает напрямую из БД.
  */
 async function updateUserInfo() {
     try {
@@ -38,7 +37,6 @@ async function updateUserInfo() {
         let userName = localStorage.getItem('user_name');
         let role = localStorage.getItem('user_role');
 
-        // Если в хранилище пусто — идем в БД
         if (!userName || !role) {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
@@ -51,7 +49,6 @@ async function updateUserInfo() {
                 if (profile) {
                     userName = profile.full_name || profile.name || 'Пользователь';
                     role = profile.role || 'user';
-                    
                     localStorage.setItem('user_name', userName);
                     localStorage.setItem('user_role', role);
                 } else {
@@ -60,9 +57,7 @@ async function updateUserInfo() {
                 }
             }
         }
-
         userEl.textContent = `${userName} (${role})`;
-        
     } catch (error) {
         console.error('Ошибка загрузки данных пользователя:', error);
         const userEl = document.getElementById('user-name');
@@ -71,13 +66,15 @@ async function updateUserInfo() {
 }
 
 /**
- * Инициализация бокового меню.
+ * Инициализация бокового меню с учетом прав доступа.
+ * ВАЖНО: 'menu-siz' НЕ включен в список скрытия для кладовщика!
  */
 function initSidebar() {
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggle-sidebar');
     const mobileToggle = document.getElementById('mobile-toggle');
     const icon = toggleBtn?.querySelector('i');
+    const role = getCurrentRole();
 
     // Восстановление состояния ПК
     if (localStorage.getItem('sidebar_collapsed') === 'true') {
@@ -110,11 +107,17 @@ function initSidebar() {
         }
     });
 
-    // Скрытие админских пунктов
-    const role = getCurrentRole();
-    if (role !== 'admin') {
-        const menuUsers = document.getElementById('menu-users');
-        if (menuUsers) menuUsers.style.display = 'none';
+    // Скрытие пунктов меню по ролям
+    const menuUsers = document.getElementById('menu-users');
+    if (role !== 'admin' && menuUsers) menuUsers.style.display = 'none';
+
+    // Скрываем недоступные модули для кладовщика и обычного пользователя
+    // menu-siz оставлен видимым для кладовщика
+    if (role === 'kladovshchik' || role === 'user') {
+        ['menu-situational', 'menu-control', 'menu-test', 'menu-personnel', 'menu-sout', 'menu-tech', 'menu-analytics', 'menu-users'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
     }
 }
 
